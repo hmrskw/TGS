@@ -21,30 +21,33 @@ public class FireWorksCreater : MonoBehaviour {
     DataManager dataManager;
 
     float time;
+    float nextShotTime;
 
     FireWorks fireWorks;
 
     // Use this for initialization
     void Start() {
+        nextShotTime = Random.Range(1f, 2f);
         time = 0;
     }
 
     // Update is called once per frame
     void Update() {
+        if (Input.GetMouseButton(0))
+        {
+            RayCast();
+        }
+
         if (!dataManager.IsGameEnd)
         {
 
             int angleID = Random.Range(0, 3);
             time += Time.deltaTime;
 
-            if (Input.GetMouseButton(0))
-            {
-                RayCast();
-            }
-
-            if (time >= 2f)
+            if (time >= nextShotTime)
             {
                 Instantiate(fireWorksSeed, this.transform.position, Quaternion.Euler(0, 0, angle[angleID] * (int)direction));
+                nextShotTime = Random.Range(1f, 2f);
                 time = 0f;
             }
         }
