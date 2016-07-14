@@ -1,7 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class FireWorks : MonoBehaviour {
+    enum FIRE_WORKS_TYPE
+    {
+        NORMAL, IGNORE
+    }
+
     [SerializeField,Tooltip("花火が不発になる高さ")]
     float deadLine;
 
@@ -12,51 +18,69 @@ public class FireWorks : MonoBehaviour {
     [SerializeField]
     float speed;
 
+    [SerializeField]
+    Material[] mat = new Material[Enum.GetNames(typeof(FIRE_WORKS_TYPE)).Length];
+
     [SerializeField, Tooltip("成功したときに発生させるパーティクル")]
     GameObject fireWorks;
 
     [SerializeField,Tooltip("失敗したときに発生させるパーティクル")]
     GameObject smoke;
 
+    FIRE_WORKS_TYPE fireWorksType;
+
     DataManager dataManager;
 
-    GameObject instantiateObj;
+//    GameObject instantiateObj;
 
     //花火が不発かどうか
-    private bool isUnExploded;
-    public bool IsUnExploded
+    private bool isExploded;
+    public bool IsExploded
     {
-        get { return isUnExploded; }
-        set {isUnExploded = value; }
+        get { return isExploded; }
+        set {isExploded = value; }
     }
 
     // Use this for initialization
     void Start () {
-        isUnExploded = true;
+        int rand = UnityEngine.Random.Range(0, 3) % 2;
+        fireWorksType = (FIRE_WORKS_TYPE)rand;
+        this.GetComponent<Renderer>().material = mat[(int)fireWorksType];
+        isExploded = false;
     }
 
     // Update is called once per frame
     void Update () {
         transform.Translate(0, speed, 0);
 
-        if (isUnExploded)
+        if (isExploded)
         {
-            //不発状態のままデッドライン超えたら煙を生成
-            if (transform.position.y > deadLine)
+            //不発状態でない玉がボーダーライン超えていたとき
+            if (transform.position.y > borderLine)
             {
-                Destroy(this.gameObject);
-                Instantiate(smoke, this.transform.position, Quaternion.Euler(0, 0, 0));
+                if (fireWorksType == FIRE_WORKS_TYPE.NORMAL)
+                {
+                    Explosion((int)this.transform.position.y);
+                }
+                else if (fireWorksType == FIRE_WORKS_TYPE.IGNORE)
+                {
+                    Miss();
+                }
             }
         }
         else
         {
-            //不発状態でない玉がボーダーライン超えていたらその場に花火を生成
-            if (transform.position.y > borderLine)
+            //不発状態のままデッドライン超えたとき
+            if (transform.position.y > deadLine)
             {
-                Destroy(this.gameObject);
-                dataManager.AddScore((int)this.transform.position.y);
-                Instantiate(fireWorks, this.transform.position, Quaternion.Euler(0, 0, 0));
-
+                if (fireWorksType == FIRE_WORKS_TYPE.NORMAL)
+                {
+                    Miss();
+                }
+                else if (fireWorksType == FIRE_WORKS_TYPE.IGNORE)
+                {
+                    Explosion(5);
+                }
             }
         }
     }
@@ -64,5 +88,17 @@ public class FireWorks : MonoBehaviour {
     public void SetDataManager(DataManager dataManager)
     {
         this.dataManager = dataManager;
+    }
+
+    private void Explosion(int score)
+    {
+        Destroy(this.gameObject);
+        dataManager.AddScore(score);
+        Instantiate(fireWorks, this.transform.position, Quaternion.Euler(0, 0, 0));
+    }
+    private void Miss()
+    {
+        Destroy(this.gameObject);
+        Instantiate(smoke, this.transform.position, Quaternion.Euler(0, 0, 0));
     }
 }

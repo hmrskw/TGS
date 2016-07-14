@@ -8,9 +8,16 @@ public class Particle : MonoBehaviour {
     // Use this for initialization
     void Start () {
         particle = GetComponent<ParticleSystem>();
-        //Debug.Log(transform.tag);
-        if (transform.tag == "FireWorks") {
-            particle.startColor = new Color(1, transform.position.y/8f,0);
+        if (transform.tag == "FireWorks")
+        {
+            if (transform.position.y < 8)
+            {
+                particle.startColor = new Color(1, transform.position.y / 8f, 0);
+            }
+            else
+            {
+                particle.startColor = Color.white;
+            }
         }
     }
 	

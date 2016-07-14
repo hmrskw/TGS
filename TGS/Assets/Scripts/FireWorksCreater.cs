@@ -46,7 +46,13 @@ public class FireWorksCreater : MonoBehaviour {
 
             if (time >= nextShotTime)
             {
-                Instantiate(fireWorksSeed, this.transform.position, Quaternion.Euler(0, 0, angle[angleID] * (int)direction));
+                GameObject obj = Instantiate(fireWorksSeed, this.transform.position, Quaternion.Euler(0, 0, angle[angleID] * (int)direction)) as GameObject;
+                fireWorks = obj.GetComponent<FireWorks>();
+                if (fireWorks != null)
+                {
+                    fireWorks.SetDataManager(dataManager);
+                }
+
                 nextShotTime = Random.Range(1f, 2f);
                 time = 0f;
             }
@@ -64,8 +70,7 @@ public class FireWorksCreater : MonoBehaviour {
             fireWorks = obj.GetComponent<FireWorks>();
             if (fireWorks != null)
             {
-                fireWorks.SetDataManager(dataManager);
-                fireWorks.IsUnExploded = false;
+                fireWorks.IsExploded = true;
             }
         }
     }
